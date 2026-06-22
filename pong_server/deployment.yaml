@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pong-server-app
+  labels:
+    app: pong-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pong-server
+  template:
+    metadata:
+      labels:
+        app: pong-server
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: pong-server
+        image: pong_server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8090
+      - name: pong-ebpf-sidecar
+        image: pong_ebpf_sidecar:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: debugfs
+            mountPath: /sys/kernel/debug
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            while ! pgrep -x "pong_server" > /dev/null; do
+              sleep 1
+            done
+            ./pong_ebpf
+        securityContext:
+          privileged: true
+      volumes:
+        - name: debugfs
+          hostPath:
+            path: /sys/kernel/debug
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pong-service
+spec:
+  type: NodePort
+  selector:
+    app: pong-server
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
+      nodePort: 30081
