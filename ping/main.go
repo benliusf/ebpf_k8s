@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"io"
@@ -19,28 +20,28 @@ func main() {
 	}
 	defer cl.Close()
 
-	ping := []byte("ping")
+	ping := []byte{'p', 'i', 'n', 'g', 0}
 	if _, err = cl.Write(ping); err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("sent: %q\n", ping)
 
+	reader := bufio.NewReader(cl)
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			default:
-				buf := make([]byte, 1024)
-				n, err := cl.Read(buf)
+				b, err := reader.ReadBytes(0)
 				if err != nil {
+					defer stop()
 					if errors.Is(err, net.ErrClosed) || err == io.EOF {
-						stop()
 						return
 					}
 					log.Fatal(err)
 				}
-				log.Printf("received: %q\n", buf[:n])
+				log.Printf("received: %q\n", b)
 			}
 		}
 	}()

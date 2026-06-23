@@ -19,8 +19,9 @@ func main() {
 	defer listener.Close()
 	log.Print("started pong server")
 
-	pong := []byte("pong")
+	pong := []byte{'p', 'o', 'n', 'g', 0}
 	go func() {
+
 		for {
 			select {
 			case <-ctx.Done():

@@ -36,14 +36,14 @@ type writeEvent struct {
 }
 
 func main() {
-	output, err := exec.Command("pgrep", "pong_server").Output()
+	out, err := exec.Command("pgrep", "pong_server").Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
 			log.Fatal("pong_server not found")
 		}
 		log.Fatal(err)
 	}
-	tmp := strings.Fields(string(output))[0]
+	tmp := strings.Fields(string(out))[0]
 	serverPid, _ := strconv.Atoi(tmp)
 
 	serverFd, _, errno := syscall.Syscall(sys_pidfd_open, uintptr(serverPid), 0, 0)
@@ -145,7 +145,7 @@ func main() {
 					}
 					if fi := os.NewFile(uintptr(newFd), fmt.Sprintf("%d", newFd)); fi != nil {
 						defer fi.Close()
-						if _, err := fi.WriteString("hello from ebpf"); err != nil {
+						if _, err := fi.WriteString("pong from ebpf\x00"); err != nil {
 							log.Println(err)
 						}
 					}
