@@ -21,7 +21,6 @@ func main() {
 
 	pong := []byte{'p', 'o', 'n', 'g', 0}
 	go func() {
-
 		for {
 			select {
 			case <-ctx.Done():

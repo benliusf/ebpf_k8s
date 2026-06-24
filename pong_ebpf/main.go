@@ -16,6 +16,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/cilium/ebpf"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/ringbuf"
 	"github.com/cilium/ebpf/rlimit"
@@ -65,23 +66,20 @@ func main() {
 	}
 	defer objs.Close()
 
-	traceEnterAccept4, err := link.Tracepoint("syscalls", "sys_enter_accept4", objs.HandleSysEnterAccept4, nil)
-	if err != nil {
-		log.Fatal(err)
+	programs := map[string]*ebpf.Program{
+		"sys_enter_accept4": objs.HandleSysEnterAccept4,
+		"sys_exit_accept4":  objs.HandleSysExitAccept4,
+		"sys_enter_read":    objs.HandleSysEnterRead,
+		"sys_exit_read":     objs.HandleSysExitRead,
+		"sys_enter_write":   objs.HandleSysEnterWrite,
 	}
-	defer traceEnterAccept4.Close()
-
-	traceExitAccept4, err := link.Tracepoint("syscalls", "sys_exit_accept4", objs.HandleSysExitAccept4, nil)
-	if err != nil {
-		log.Fatal(err)
+	for name, program := range programs {
+		tp, err := link.Tracepoint("syscalls", name, program, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer tp.Close()
 	}
-	defer traceExitAccept4.Close()
-
-	traceEnterWrite, err := link.Tracepoint("syscalls", "sys_enter_write", objs.HandleSysEnterWrite, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer traceEnterWrite.Close()
 
 	var fds sync.Map
 
