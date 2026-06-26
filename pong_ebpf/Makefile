@@ -1,9 +1,14 @@
 .DEFAULT_GOAL := build
 
-.PHONY: clean build linux-build
+.PHONY: clean destroy build linux-build
+
+OBJS := pong_bpf.go pong_bpf.o pong_ebpf
 
 clean:
-	rm -f pong_ebpf
+	rm -f $(OBJS)
+
+destroy:
+	$(MAKE) clean
 	kubectl delete pod linux-build --ignore-not-found
 
 build:
@@ -32,6 +37,8 @@ linux-build:
 		kubectl cp ./$$file linux-build:/pong_ebpf/; \
 	done
 
-	kubectl exec linux-build -- make build
-	kubectl cp linux-build:pong_ebpf ./pong_ebpf
-	chmod +x ./pong_ebpf
+	kubectl exec linux-build -- make
+
+	@for file in $(OBJS); do \
+		kubectl cp linux-build:$$file ./$$file; \
+	done
