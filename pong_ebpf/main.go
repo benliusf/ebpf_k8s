@@ -46,7 +46,6 @@ func main() {
 	}
 	tmp := strings.Fields(string(out))[0]
 	serverPid, _ := strconv.Atoi(tmp)
-
 	serverFd, _, errno := syscall.Syscall(sys_pidfd_open, uintptr(serverPid), 0, 0)
 	if errno != 0 {
 		log.Fatal(fmt.Errorf("failure to get pong_server fd: %v", errno))

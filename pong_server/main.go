@@ -19,7 +19,8 @@ func main() {
 	defer listener.Close()
 	log.Print("started pong server")
 
-	pong := []byte{'p', 'o', 'n', 'g', 0}
+	const null byte = byte(0x00)
+	pong := []byte{'p', 'o', 'n', 'g', null}
 	go func() {
 		for {
 			select {

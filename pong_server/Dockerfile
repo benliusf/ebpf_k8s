@@ -15,6 +15,6 @@ FROM debian:12-slim as pong-ebpf-sidecar-image
 RUN apt-get update && apt-get install -y procps
 
 WORKDIR /app
-COPY pong_ebpf ./
+COPY --chmod=755 pong_ebpf ./
 
 CMD ["./pong_ebpf"]

@@ -20,7 +20,8 @@ func main() {
 	}
 	defer cl.Close()
 
-	ping := []byte{'p', 'i', 'n', 'g', 0}
+	const null byte = byte(0x00)
+	ping := []byte{'p', 'i', 'n', 'g', null}
 	if _, err = cl.Write(ping); err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +34,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			default:
-				b, err := reader.ReadBytes(0)
+				b, err := reader.ReadBytes(null)
 				if err != nil {
 					defer stop()
 					if errors.Is(err, net.ErrClosed) || err == io.EOF {
