@@ -1,6 +1,7 @@
 //go:build ignore
 #include "vmlinux.h"
 #include <bpf/bpf_helpers.h>
+#include <string.h>
 
 char _license[] SEC("license") = "GPL";
 
@@ -34,7 +35,7 @@ bool is_pong_server() {
 	const char *pong_server = "pong_server";
 	char comm[16];
 	return bpf_get_current_comm(&comm, sizeof(comm)) == 0 &&
-		   bpf_strncmp(comm, 12, pong_server) == 0;
+		   bpf_strncmp(comm, strlen(pong_server), pong_server) == 0;
 }
 
 SEC("tracepoint/syscalls/sys_enter_accept4")
