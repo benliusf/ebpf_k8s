@@ -5,7 +5,9 @@ RUN dpkg --add-architecture i386 && \
     apt-get install -y build-essential \
                        llvm \
                        libelf-dev \
-                       libbpf-dev
+                       libbpf-dev \
+                       bpftool
+
 RUN apt-get install -y gcc-multilib
 RUN apt-get install -y clang
 

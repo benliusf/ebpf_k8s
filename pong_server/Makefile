@@ -1,6 +1,12 @@
-all: compile
+.DEFAULT_GOAL := build
 
-compile:
+.PHONY: clean build docker deploy attach
+
+clean:
+	rm -f pong_server pong_ebpf
+	kubectl delete -f deployment.yaml --ignore-not-found
+
+build:
 	GOOS=linux GOARCH=arm64 go build -o pong_server
 
 docker:
@@ -24,9 +30,5 @@ attach:
 	@until kubectl get pods | grep -q "pong-server"; do \
 		sleep 1; \
 	done
-
 	kubectl wait --for=condition=Ready pods -l app=pong-server --timeout=120s
 	kubectl port-forward service/pong-service 8090:8090
-
-destroy:
-	kubectl delete -f deployment.yaml
