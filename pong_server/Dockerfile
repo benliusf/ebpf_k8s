@@ -16,5 +16,6 @@ RUN apt-get update && apt-get install -y procps
 
 WORKDIR /app
 COPY --chmod=755 pong_ebpf ./
+COPY entrypoint.sh ./
 
-CMD ["./pong_ebpf"]
+ENTRYPOINT ["./entrypoint.sh"]

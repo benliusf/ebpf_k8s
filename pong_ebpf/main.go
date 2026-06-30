@@ -6,13 +6,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"flag"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"os/signal"
-	"strconv"
-	"strings"
 	"sync"
 	"syscall"
 
@@ -37,16 +35,12 @@ type writeEvent struct {
 }
 
 func main() {
-	out, err := exec.Command("pgrep", "pong_server").Output()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
-			log.Fatal("pong_server not found")
-		}
-		log.Fatal(err)
+	serverPid := flag.Int("server_pid", -1, "process id of pong_server")
+	flag.Parse()
+	if serverPid == nil {
+		log.Fatal("-server_pid must be provided")
 	}
-	tmp := strings.Fields(string(out))[0]
-	serverPid, _ := strconv.Atoi(tmp)
-	serverFd, _, errno := syscall.Syscall(sys_pidfd_open, uintptr(serverPid), 0, 0)
+	serverFd, _, errno := syscall.Syscall(sys_pidfd_open, uintptr(*serverPid), 0, 0)
 	if errno != 0 {
 		log.Fatal(fmt.Errorf("failure to get pong_server fd: %v", errno))
 	}

@@ -16,6 +16,8 @@ docker:
 	fi
 	cp ../pong_ebpf/pong_ebpf .
 
+	$(MAKE) build
+
 	docker build --target pong-server-image -t pong_server:latest .
 	kind load docker-image pong_server:latest --name my-node
 

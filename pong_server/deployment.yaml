@@ -28,13 +28,6 @@ spec:
         volumeMounts:
           - name: debugfs
             mountPath: /sys/kernel/debug
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            while ! pgrep -x "pong_server" > /dev/null; do
-              sleep 1
-            done
-            ./pong_ebpf
         securityContext:
           privileged: true
       volumes:
